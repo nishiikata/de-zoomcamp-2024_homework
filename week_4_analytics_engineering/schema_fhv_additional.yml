@@ -1,0 +1,103 @@
+
+## /models/staging/schema.yml
+models:
+    - name: stg_fhv_tripdata
+      description: >
+        Trip made by green taxis, also known as boro taxis and street-hail liveries.
+        Green taxis may respond to street hails,but only in the areas indicated in green on the
+        map (i.e. above W 110 St/E 96th St in Manhattan and in the boroughs).
+        The records were collected and provided to the NYC Taxi and Limousine Commission (TLC) by
+        technology service providers. 
+      columns:
+          - name: dispatching_base_num
+            description: > 
+                The TLC Base License Number of the base that dispatched the trip
+          - name: pickup_datetime
+            description: The date and time when the meter was engaged.
+          - name: dropoff_datetime
+            description: The date and time when the meter was disengaged.
+          - name: pickup_locationid
+            description: locationid where the meter was engaged.
+            tests:
+              - relationships:
+                  to: ref('taxi_zone_lookup')
+                  field: locationid
+                  severity: warn
+          - name: dropoff_locationid 
+            description: locationid where the meter was engaged.
+            tests:
+              - relationships:
+                  to: ref('taxi_zone_lookup')
+                  field: locationid
+                  severity: warn
+          - name: sr_flag
+            description: > 
+                Indicates if the trip was a part of a shared ride chain offered by a 
+                High Volume FHV company (e.g. Uber Pool, Lyft Line). For shared 
+                trips, the value is 1. For non-shared rides, this field is null.
+                NOTE: For most High Volume FHV companies, only shared rides that 
+                were requested AND matched to another shared-ride request over 
+                the course of the journey are flagged. However, Lyft (base license 
+                numbers B02510 + B02844) also flags rides for which a shared ride 
+                was requested but another passenger was not successfully matched 
+                to share the trip—therefore, trips records with SR_Flag=1 from those 
+                two bases could indicate EITHER a first trip in a shared trip chain OR 
+                a trip for which a shared ride was requested but never matched. 
+                Users should anticipate an overcount of successfully shared trips 
+                completed by Lyft. 
+          - name: affiliated_base_number
+            description: > 
+                The TLC Base License Number of the base that
+                are a part of "TLC authorized For-Hire vehicles that are active."
+
+## /models/core/schema.yml
+models:
+  - name: fact_fhv_trips
+    description: >
+      Taxi trips corresponding to For-Hire Vehicle ("FHV") services.
+      The table contains records where both pickup and dropoff locations are valid and known zones.
+      Each record corresponds to a trip uniquely identified by tripid.
+    columns:
+      - name: dispatching_base_num
+        data_type: string
+        description: ""
+
+      - name: pickup_locationid
+        data_type: int64
+        description: ""
+
+      - name: pickup_borough
+        data_type: string
+        description: ""
+
+      - name: pickup_zone
+        data_type: string
+        description: ""
+
+      - name: dropoff_locationid
+        data_type: int64
+        description: ""
+
+      - name: dropoff_borough
+        data_type: string
+        description: ""
+
+      - name: dropoff_zone
+        data_type: string
+        description: ""
+
+      - name: pickup_datetime
+        data_type: timestamp
+        description: ""
+
+      - name: dropoff_datetime
+        data_type: timestamp
+        description: ""
+
+      - name: sr_flag
+        data_type: float
+        description: ""
+
+      - name: affiliated_base_number
+        data_type: string
+        description: ""
